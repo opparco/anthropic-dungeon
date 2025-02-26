@@ -1,6 +1,7 @@
 // src/context/GameContext.js
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { monsterTemplates, eventTemplates } from '../utils/game-data';
+import { rollForSpecialEvent, EVENT_TYPES } from '../utils/special-events';
 import { saveGame, loadGame, hasSavedGame, deleteSavedGame } from '../utils/SaveLoadSystem';
 
 // Initial game state
@@ -57,6 +58,7 @@ const ACTION_TYPES = {
   INCREASE_SKILL: 'INCREASE_SKILL',
   SET_SPECIAL_EVENT: 'SET_SPECIAL_EVENT',
   CLEAR_SPECIAL_EVENT: 'CLEAR_SPECIAL_EVENT',
+  APPLY_EVENT_EFFECT: 'APPLY_EVENT_EFFECT',
   LOAD_SAVED_GAME: 'LOAD_SAVED_GAME'
 };
 
@@ -146,6 +148,15 @@ function gameReducer(state, action) {
       return {
         ...state,
         specialEvent: null
+      };
+      
+    case ACTION_TYPES.APPLY_EVENT_EFFECT:
+      return {
+        ...state,
+        character: {
+          ...state.character,
+          ...action.payload.characterUpdates
+        }
       };
       
     case ACTION_TYPES.RESET_GAME:
@@ -383,91 +394,74 @@ export function GameProvider({ children }) {
     
     // Check for special events
     checkSpecialEvent: () => {
-      if (Math.random() < 0.05) {
-        const eventType = Math.random() < 0.5 ? 'rareMonster' : 'blessingFountain';
+      const event = rollForSpecialEvent(state.dungeon.level);
+      
+      if (event) {
+        // Set the special event in state
+        dispatch({
+          type: ACTION_TYPES.SET_SPECIAL_EVENT,
+          payload: event
+        });
         
-        if (eventType === 'rareMonster') {
-          const rareMonster = {
-            name: "古代のガーディアン",
-            hp: 100 + state.dungeon.level * 10,
-            maxHp: 100 + state.dungeon.level * 10,
-            attack: 15 + state.dungeon.level,
-            defense: 8 + Math.floor(state.dungeon.level / 2),
-            xp: 50 + state.dungeon.level * 5
-          };
-          
+        // Add event messages to the log
+        if (event.messages && event.messages.length > 0) {
+          event.messages.forEach(message => {
+            gameUtils.addLog(message, 'critical');
+          });
+        }
+        
+        // If it's a rare monster, spawn it
+        if (event.type === EVENT_TYPES.RARE_MONSTER && event.monster) {
           dispatch({
             type: ACTION_TYPES.UPDATE_DUNGEON,
             payload: { 
               enemyPresent: true,
-              currentEnemy: rareMonster 
+              currentEnemy: event.monster 
             }
           });
-          
-          gameUtils.addLog("床が振動し、壁から光が漏れ出す...", 'critical');
-          gameUtils.addLog("強大なエネルギーを感じる！", 'critical');
-          gameUtils.addLog(`${rareMonster.name}が現れた！`, 'critical');
-          
-          dispatch({
-            type: ACTION_TYPES.SET_SPECIAL_EVENT,
-            payload: { type: 'rareMonster', data: rareMonster }
-          });
-          
-          return true;
-        } else {
-          dispatch({
-            type: ACTION_TYPES.SET_SPECIAL_EVENT,
-            payload: { type: 'blessingFountain' }
-          });
-          
-          gameUtils.addLog("祝福の泉を見つけました！特別な力を得ることができます。", 'critical');
-          return true;
         }
+        
+        return true;
       }
       
       return false;
     },
     
-    // Apply blessing fountain effect
-    applyFountainEffect: (effect) => {
-      switch (effect) {
-        case 'hp':
-          dispatch({
-            type: ACTION_TYPES.UPDATE_CHARACTER,
-            payload: { 
-              maxHp: state.character.maxHp + 10,
-              hp: state.character.maxHp + 10
-            }
-          });
-          gameUtils.addLog("体力が強化されました！最大HPが10増加し、HPが全回復しました。", 'success');
-          break;
-        case 'mp':
-          dispatch({
-            type: ACTION_TYPES.UPDATE_CHARACTER,
-            payload: { 
-              maxMp: state.character.maxMp + 8,
-              mp: state.character.maxMp + 8
-            }
-          });
-          gameUtils.addLog("魔力が強化されました！最大MPが8増加し、MPが全回復しました。", 'success');
-          break;
-        case 'stat':
-          dispatch({
-            type: ACTION_TYPES.UPDATE_CHARACTER,
-            payload: { 
-              stats: {
-                ...state.character.stats,
-                str: state.character.stats.str + 1,
-                dex: state.character.stats.dex + 1,
-                int: state.character.stats.int + 1,
-                mnd: state.character.stats.mnd + 1
-              }
-            }
-          });
-          gameUtils.addLog("能力が強化されました！すべての能力値が1増加しました。", 'success');
-          break;
+    // Apply effect from blessing fountain or other events
+    applyEventEffect: (optionId) => {
+      const { specialEvent } = state;
+      
+      if (!specialEvent || !specialEvent.options) {
+        return;
       }
       
+      // Find the selected option
+      const selectedOption = specialEvent.options.find(option => option.id === optionId);
+      
+      if (!selectedOption) {
+        return;
+      }
+      
+      // Apply the effect
+      const effectResult = selectedOption.effect(state.character);
+      
+      // Update character with the effect
+      dispatch({
+        type: ACTION_TYPES.APPLY_EVENT_EFFECT,
+        payload: {
+          characterUpdates: effectResult
+        }
+      });
+      
+      // Log the message
+      if (selectedOption.message) {
+        gameUtils.addLog(
+          selectedOption.message(effectResult), 
+          'success'
+        );
+      }
+      
+      // Clear the special event
       dispatch({ type: ACTION_TYPES.CLEAR_SPECIAL_EVENT });
       
       // Mark room as cleared

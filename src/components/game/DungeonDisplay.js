@@ -3,29 +3,17 @@ import { useGame } from '../../context/GameContext';
 import { getRandomRoomDescription } from '../../utils/game-data';
 import EnemyDisplay from './EnemyDisplay';
 import TreasureDisplay from './TreasureDisplay';
+import SpecialEventDisplay from './SpecialEventDisplay';
 
 const DungeonDisplay = () => {
-  const { state, specialEvent } = useGame();
+  const { state } = useGame();
   const { dungeon } = state;
   
   // Helper function to render the appropriate content
   const renderDungeonContent = () => {
-    // If there's a special event, render it
+    // If there's a special event, render it using our new component
     if (state.specialEvent) {
-      if (state.specialEvent.type === 'rareMonster') {
-        if (dungeon.currentEnemy) {
-          return <EnemyDisplay enemy={dungeon.currentEnemy} isRare={true} />;
-        } else {
-          return (
-            <div className="text-center py-6">
-              <p className="mb-4 text-yellow-300">特殊なモンスターが現れたようだが、姿が見えない...</p>
-              <p>先に進もう。</p>
-            </div>
-          );
-        }
-      } else if (state.specialEvent.type === 'blessingFountain') {
-        return <BlessingFountain />;
-      }
+      return <SpecialEventDisplay />;
     }
     
     // Otherwise render normal room content
@@ -73,39 +61,6 @@ const EmptyRoom = () => {
     <div className="text-center py-6">
       <p className="mb-4">{getRandomRoomDescription()}</p>
       <p>先に進むか、休むか選択してください。</p>
-    </div>
-  );
-};
-
-// Blessing fountain component
-const BlessingFountain = () => {
-  const { applyFountainEffect } = useGame();
-  
-  return (
-    <div className="bg-amber-900/40 rounded-lg p-4 text-center">
-      <h3 className="text-xl font-bold text-amber-300 mb-2">祝福の泉を見つけた！</h3>
-      <p className="mb-4">神秘的な力があなたを包み込む...</p>
-      
-      <div className="flex flex-wrap justify-center gap-2">
-        <button 
-          onClick={() => applyFountainEffect('hp')}
-          className="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded shadow"
-        >
-          体力強化
-        </button>
-        <button 
-          onClick={() => applyFountainEffect('mp')}
-          className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded shadow"
-        >
-          魔力強化
-        </button>
-        <button 
-          onClick={() => applyFountainEffect('stat')}
-          className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded shadow"
-        >
-          能力強化
-        </button>
-      </div>
     </div>
   );
 };
