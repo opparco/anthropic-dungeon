@@ -500,7 +500,30 @@ export function GameProvider({ children }) {
         dispatch({ type: ACTION_TYPES.CLEAR_SPECIAL_EVENT });
       }
     },
-    
+
+    negotiateSuccess: (divisor = 4) => {
+      const enemy = state.dungeon.currentEnemy;
+      
+      if (!enemy) return;
+      
+      const xpGain = Math.floor(enemy.xp / divisor);
+      gameUtils.gainXP(xpGain);
+      
+      dispatch({
+        type: ACTION_TYPES.UPDATE_DUNGEON,
+        payload: {
+          enemyPresent: false,
+          currentEnemy: null,
+          clearedRooms: state.dungeon.clearedRooms + 1
+        }
+      });
+
+      // Clear any special event if this was a rare monster
+      if (state.specialEvent && state.specialEvent.type === 'rareMonster') {
+        dispatch({ type: ACTION_TYPES.CLEAR_SPECIAL_EVENT });
+      }
+    },
+
     // Advance to the next dungeon level
     nextDungeonLevel: () => {
       const newLevel = state.dungeon.level + 1;

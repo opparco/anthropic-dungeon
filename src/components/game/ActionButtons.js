@@ -12,6 +12,7 @@ const ActionButtons = () => {
     updateCharacter, 
     updateDungeon,
     defeatEnemy,
+    negotiateSuccess,
     gameOver,
     checkSpecialEvent,
     nextDungeonLevel
@@ -333,28 +334,12 @@ const ActionButtons = () => {
         // Critical success
         addLog(`クリティカル交渉！${enemy.name}が味方になった！`, 'critical');
         
-        // Bonus XP
-        gainXP(Math.floor(enemy.xp / 2));
-        
-        // Clear room
-        updateDungeon({
-          enemyPresent: false,
-          currentEnemy: null,
-          clearedRooms: dungeon.clearedRooms + 1
-        });
+        negotiateSuccess(2);
       } else if (negotiationResult.success) {
         // Success
         addLog(`交渉成功！${enemy.name}は去っていった。`, 'success');
         
-        // Small XP bonus
-        gainXP(Math.floor(enemy.xp / 4));
-        
-        // Clear room
-        updateDungeon({
-          enemyPresent: false,
-          currentEnemy: null,
-          clearedRooms: dungeon.clearedRooms + 1
-        });
+        negotiateSuccess(4);
       } else {
         // Failure - enemy attacks
         addLog(`交渉失敗！${enemy.name}は怒っている！`, 'failure');
