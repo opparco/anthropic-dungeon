@@ -12,6 +12,13 @@ const GamePage = () => {
   const { state, addLog } = useGame();
   const navigate = useNavigate();
   
+  // Redirect to home if character isn't created yet
+  useEffect(() => {
+    if (!state.hasCreatedCharacter) {
+      navigate('/');
+    }
+  }, [state.hasCreatedCharacter, navigate]);
+  
   // Redirect to game-over page if isGameOver is true
   useEffect(() => {
     if (state.isGameOver) {
@@ -25,6 +32,11 @@ const GamePage = () => {
       addLog("ゲーム開始！ダンジョンの探索を始めましょう。");
     }
   }, [addLog, state.gameLog.length]);
+
+  // If redirecting, don't render the page content
+  if (!state.hasCreatedCharacter) {
+    return null;
+  }
 
   return (
     <div className="game-page max-w-5xl mx-auto">

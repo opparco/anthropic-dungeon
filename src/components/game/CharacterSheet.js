@@ -16,6 +16,13 @@ const CharacterSheet = () => {
         キャラクターシート
       </h3>
       
+      {/* Character name */}
+      <div className="px-4 pt-3">
+        <h4 className="text-xl font-bold text-amber-300 mb-3">
+          {character.name || '無名の冒険者'}
+        </h4>
+      </div>
+      
       {/* HP and MP bars */}
       <div className="p-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">

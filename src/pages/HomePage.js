@@ -1,14 +1,23 @@
 // src/pages/HomePage.js
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import CharacterCreator from '../components/game/CharacterCreator';
 
 const HomePage = () => {
   const { resetGame } = useGame();
+  const [showCharacterCreator, setShowCharacterCreator] = useState(false);
 
   // Reset game state when starting from homepage
   const handleStartGame = () => {
     resetGame();
+    setShowCharacterCreator(true);
   };
+
+  // If showing character creator, render it
+  if (showCharacterCreator) {
+    return <CharacterCreator />;
+  }
 
   return (
     <div className="max-w-3xl mx-auto text-center py-10">
@@ -24,13 +33,12 @@ const HomePage = () => {
           モンスターを倒し、罠を回避し、宝物を見つけながらダンジョンの奥へと進みましょう。あなたの冒険がここから始まります。
         </p>
         
-        <Link 
-          to="/game" 
+        <button 
           onClick={handleStartGame}
           className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg shadow-md"
         >
           冒険を始める
-        </Link>
+        </button>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

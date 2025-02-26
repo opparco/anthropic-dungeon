@@ -5,6 +5,7 @@ import { monsterTemplates, eventTemplates } from '../utils/game-data';
 // Initial game state
 const initialGameState = {
   character: {
+    name: localStorage.getItem('dungeonHackCharacterName') || '無名の冒険者',
     hp: 30,
     maxHp: 30,
     mp: 20,
@@ -38,7 +39,8 @@ const initialGameState = {
   gameLog: [],
   isGameOver: false,
   isLevelingUp: false,
-  specialEvent: null
+  specialEvent: null,
+  hasCreatedCharacter: false
 };
 
 // Action types
@@ -71,7 +73,8 @@ function gameReducer(state, action) {
         character: {
           ...state.character,
           ...action.payload
-        }
+        },
+        hasCreatedCharacter: true
       };
       
     case ACTION_TYPES.UPDATE_DUNGEON:
@@ -146,6 +149,7 @@ function gameReducer(state, action) {
     case ACTION_TYPES.RESET_GAME:
       return {
         ...initialGameState,
+        hasCreatedCharacter: action.payload?.hasCreatedCharacter ?? false,
         gameLog: [{ text: "ゲーム開始！ダンジョンの探索を始めましょう。", className: '' }]
       };
       
@@ -250,7 +254,11 @@ export function GameProvider({ children }) {
     
     // Reset the game
     resetGame: () => {
-      dispatch({ type: ACTION_TYPES.RESET_GAME });
+      localStorage.removeItem('dungeonHackCharacterName');
+      dispatch({ 
+        type: ACTION_TYPES.RESET_GAME,
+        payload: { hasCreatedCharacter: false }
+      });
     },
     
     // Handle gaining XP
