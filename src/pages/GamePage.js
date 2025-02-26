@@ -1,5 +1,5 @@
 // src/pages/GamePage.js
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import CharacterSheet from '../components/game/CharacterSheet';
@@ -7,9 +7,11 @@ import DungeonDisplay from '../components/game/DungeonDisplay';
 import ActionButtons from '../components/game/ActionButtons';
 import GameLog from '../components/game/GameLog';
 import LevelUpMenu from '../components/game/LevelUpMenu';
+import SaveLoadMenu from '../components/game/SaveLoadMenu';
 
 const GamePage = () => {
   const { state, addLog } = useGame();
+  const [showSaveMenu, setShowSaveMenu] = useState(false);
   const navigate = useNavigate();
   
   // Redirect to home if character isn't created yet
@@ -40,10 +42,18 @@ const GamePage = () => {
 
   return (
     <div className="game-page max-w-5xl mx-auto">
-      <div className="text-center mb-4">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-sky-400">
           ダンジョン階層: <span className="text-white">{state.dungeon.level}</span>
         </h2>
+        
+        {/* メニューボタン */}
+        <button
+          onClick={() => setShowSaveMenu(true)}
+          className="bg-indigo-700 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg transition-colors"
+        >
+          メニュー
+        </button>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -66,6 +76,11 @@ const GamePage = () => {
           <GameLog />
         </div>
       </div>
+      
+      {/* セーブ/ロードメニュー */}
+      {showSaveMenu && (
+        <SaveLoadMenu onClose={() => setShowSaveMenu(false)} />
+      )}
     </div>
   );
 };

@@ -1,17 +1,42 @@
 // src/pages/HomePage.js
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import CharacterCreator from '../components/game/CharacterCreator';
+import { getSaveDateTime } from '../utils/SaveLoadSystem';
 
 const HomePage = () => {
-  const { resetGame } = useGame();
+  const { resetGame, hasSavedGame, loadSavedGame } = useGame();
   const [showCharacterCreator, setShowCharacterCreator] = useState(false);
+  const [saveExists, setSaveExists] = useState(false);
+  const [saveDate, setSaveDate] = useState(null);
+  const navigate = useNavigate();
+
+  // セーブデータの存在を確認
+  useEffect(() => {
+    const exists = hasSavedGame();
+    setSaveExists(exists);
+    
+    if (exists) {
+      const savedAt = getSaveDateTime();
+      if (savedAt) {
+        const date = new Date(savedAt);
+        setSaveDate(date.toLocaleString());
+      }
+    }
+  }, [hasSavedGame]);
 
   // Reset game state when starting from homepage
   const handleStartGame = () => {
     resetGame();
     setShowCharacterCreator(true);
+  };
+  
+  // 続きからゲームを始める
+  const handleContinueGame = () => {
+    if (loadSavedGame()) {
+      navigate('/game');
+    }
   };
 
   // If showing character creator, render it
@@ -33,12 +58,30 @@ const HomePage = () => {
           モンスターを倒し、罠を回避し、宝物を見つけながらダンジョンの奥へと進みましょう。あなたの冒険がここから始まります。
         </p>
         
-        <button 
-          onClick={handleStartGame}
-          className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg shadow-md"
-        >
-          冒険を始める
-        </button>
+        <div className="space-y-4">
+          {saveExists && (
+            <div className="mb-6">
+              <div className="p-4 bg-indigo-800 rounded mb-3 text-left">
+                <h3 className="font-semibold mb-1">セーブデータが見つかりました</h3>
+                <p className="text-sm mb-1">最終保存日時: <span className="text-amber-300">{saveDate}</span></p>
+              </div>
+              
+              <button 
+                onClick={handleContinueGame}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg shadow-md mb-2"
+              >
+                冒険を続ける
+              </button>
+            </div>
+          )}
+          
+          <button 
+            onClick={handleStartGame}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-lg shadow-md"
+          >
+            新しい冒険を始める
+          </button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

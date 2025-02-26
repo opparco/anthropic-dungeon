@@ -1,6 +1,7 @@
 // src/context/GameContext.js
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { monsterTemplates, eventTemplates } from '../utils/game-data';
+import { saveGame, loadGame, hasSavedGame, deleteSavedGame } from '../utils/SaveLoadSystem';
 
 // Initial game state
 const initialGameState = {
@@ -55,7 +56,8 @@ const ACTION_TYPES = {
   INCREASE_STAT: 'INCREASE_STAT',
   INCREASE_SKILL: 'INCREASE_SKILL',
   SET_SPECIAL_EVENT: 'SET_SPECIAL_EVENT',
-  CLEAR_SPECIAL_EVENT: 'CLEAR_SPECIAL_EVENT'
+  CLEAR_SPECIAL_EVENT: 'CLEAR_SPECIAL_EVENT',
+  LOAD_SAVED_GAME: 'LOAD_SAVED_GAME'
 };
 
 // Reducer function
@@ -153,6 +155,19 @@ function gameReducer(state, action) {
         gameLog: [{ text: "ゲーム開始！ダンジョンの探索を始めましょう。", className: '' }]
       };
       
+    case ACTION_TYPES.LOAD_SAVED_GAME:
+      return {
+        ...state,
+        character: action.payload.character,
+        dungeon: action.payload.dungeon,
+        isGameOver: action.payload.isGameOver || false,
+        hasCreatedCharacter: action.payload.hasCreatedCharacter || false,
+        gameLog: [
+          ...state.gameLog,
+          { text: "保存したゲームをロードしました。", className: 'success' }
+        ]
+      };
+    
     default:
       return state;
   }
@@ -503,6 +518,37 @@ export function GameProvider({ children }) {
       });
       
       gameUtils.addLog(`ダンジョン階層${newLevel}に到達しました！`, 'critical');
+    },
+
+    saveGame: () => {
+      const success = saveGame(state);
+      if (success) {
+        gameUtils.addLog("ゲームを保存しました。", 'success');
+      } else {
+        gameUtils.addLog("ゲームの保存に失敗しました。", 'failure');
+      }
+      return success;
+    },
+
+    loadSavedGame: () => {
+      const savedState = loadGame();
+      if (savedState) {
+        dispatch({
+          type: ACTION_TYPES.LOAD_SAVED_GAME,
+          payload: savedState
+        });
+        return true;
+      }
+      return false;
+    },
+
+    hasSavedGame: () => {
+      return hasSavedGame();
+    },
+
+    deleteSavedGame: () => {
+      deleteSavedGame();
+      gameUtils.addLog("セーブデータを削除しました。", 'success');
     }
   };
   
