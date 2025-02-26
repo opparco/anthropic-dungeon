@@ -35,7 +35,9 @@ const router = createBrowserRouter([
       }
     ]
   }
-]);
+],
+	{ basename: "/anthropic-dungeon" }
+);
 
 function App() {
   return (
