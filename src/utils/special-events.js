@@ -69,7 +69,7 @@ export const specialEvents = [
   {
     type: EVENT_TYPES.BLESSING_FOUNTAIN,
     name: "祝福の泉",
-    chance: 0.03,
+    chance: 0.015,
     description: "様々な恩恵を与える神秘的な泉",
     
     // Generate event data
@@ -84,10 +84,11 @@ export const specialEvents = [
               const hpBonus = 5 + Math.floor(dungeonLevel / 2);
               return {
                 maxHp: character.maxHp + hpBonus,
-                hp: character.maxHp + hpBonus
+                hp: character.maxHp + hpBonus,
+                hpBonus: hpBonus
               };
             },
-            message: (value) => `体力が強化されました！最大HPが${value}増加し、HPが全回復しました。`
+            message: (result) => `体力が強化されました！最大HPが${result.hpBonus}増加し、HPが全回復しました。`
           },
           {
             id: 'mp',
@@ -97,10 +98,11 @@ export const specialEvents = [
               const mpBonus = 3 + Math.floor(dungeonLevel / 3);
               return {
                 maxMp: character.maxMp + mpBonus,
-                mp: character.maxMp + mpBonus
+                mp: character.maxMp + mpBonus,
+                mpBonus: mpBonus
               };
             },
-            message: (value) => `魔力が強化されました！最大MPが${value}増加し、MPが全回復しました。`
+            message: (result) => `魔力が強化されました！最大MPが${result.mpBonus}増加し、MPが全回復しました。`
           },
           {
             id: 'stat',
@@ -115,10 +117,11 @@ export const specialEvents = [
                   dex: character.stats.dex + statBonus,
                   int: character.stats.int + statBonus,
                   mnd: character.stats.mnd + statBonus
-                }
+                },
+                statBonus: statBonus
               };
             },
-            message: (value) => `能力が強化されました！すべての能力値が${value}増加しました。`
+            message: (result) => `能力が強化されました！すべての能力値が${result.statBonus}増加しました。`
           }
         ],
         messages: ["祝福の泉を見つけました！特別な力を得ることができます。"]
@@ -128,7 +131,7 @@ export const specialEvents = [
   {
     type: EVENT_TYPES.MYSTERIOUS_MERCHANT,
     name: "謎の商人",
-    chance: 0.02,
+    chance: 0.00,
     description: "ダンジョンの奥で出会う不思議な商人",
     
     // Generate event data
@@ -140,7 +143,7 @@ export const specialEvents = [
             id: 'hpPotion',
             name: '秘薬',
             cost: Math.floor(dungeonLevel * 10),
-            description: '一時的にHPを大幅に回復する',
+            description: 'HPを大幅に回復する',
             effect: (character) => {
               const healAmount = character.maxHp * 0.5;
               return {

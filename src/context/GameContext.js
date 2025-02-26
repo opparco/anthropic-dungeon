@@ -151,11 +151,19 @@ function gameReducer(state, action) {
       };
       
     case ACTION_TYPES.APPLY_EVENT_EFFECT:
+      const characterUpdates = {...action.payload.characterUpdates};
+      const metaKeys = ['statBonus', 'hpBonus', 'mpBonus', 'blessed', 'boostedStat', 'boostAmount'];
+      metaKeys.forEach(key => {
+        if (key in characterUpdates) {
+          delete characterUpdates[key];
+        }
+      });
+
       return {
         ...state,
         character: {
           ...state.character,
-          ...action.payload.characterUpdates
+          ...characterUpdates
         }
       };
       
