@@ -13,7 +13,16 @@ const DungeonDisplay = () => {
     // If there's a special event, render it
     if (state.specialEvent) {
       if (state.specialEvent.type === 'rareMonster') {
-        return <EnemyDisplay enemy={state.dungeon.currentEnemy} isRare={true} />;
+        if (dungeon.currentEnemy) {
+          return <EnemyDisplay enemy={dungeon.currentEnemy} isRare={true} />;
+        } else {
+          return (
+            <div className="text-center py-6">
+              <p className="mb-4 text-yellow-300">特殊なモンスターが現れたようだが、姿が見えない...</p>
+              <p>先に進もう。</p>
+            </div>
+          );
+        }
       } else if (state.specialEvent.type === 'blessingFountain') {
         return <BlessingFountain />;
       }
