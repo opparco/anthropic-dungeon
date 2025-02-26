@@ -1,6 +1,6 @@
 # ダンジョンハック (Dungeon Hack)
 
-A React-based roguelike dungeon crawler game built with React Router v7 and Tailwind CSS.
+A React-based roguelike dungeon crawler game built with React Router and Tailwind CSS.
 
 ## Features
 
