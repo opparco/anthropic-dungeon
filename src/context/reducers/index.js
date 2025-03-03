@@ -13,7 +13,7 @@ export const gameReducer = (state, action) => {
   if (action.type === ACTION_TYPES.RESET_GAME) {
     return {
       ...initialGameState,
-      hasCreatedCharacter: action.payload?.hasCreatedCharacter ?? false,
+      hasCreatedCharacter: action.payload.hasCreatedCharacter || false,
       gameLog: [{ text: "ゲーム開始！ダンジョンの探索を始めましょう。", className: '' }]
     };
   }
