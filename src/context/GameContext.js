@@ -3,7 +3,7 @@ import { createContext, useContext, useReducer, useEffect } from 'react';
 import initialGameState from './initialState';
 import gameReducer from './reducers';
 import { ACTION_TYPES } from './actions';
-import createGameUtils from './utils/gameUtils';
+import createGameUtils from './utils';
 
 // Create game context
 const GameContext = createContext();
